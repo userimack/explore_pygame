@@ -6,6 +6,7 @@ import pygame
 
 from pygame.locals import K_w, K_a, K_s, K_d, K_UP, K_DOWN, K_RIGHT, K_LEFT
 
+
 # 2 - Initialize the game
 pygame.init()
 width, height = 640, 480
@@ -47,6 +48,8 @@ health = pygame.image.load("resources/images/health.png")
 gameover = pygame.image.load("resources/images/gameover.png")
 youwin = pygame.image.load("resources/images/youwin.png")
 
+retry = pygame.image.load("resources/images/retry.png")
+
 # 3.1 - Load audio
 hit = pygame.mixer.Sound("resources/audio/explode.wav")
 enemy = pygame.mixer.Sound("resources/audio/enemy.wav")
@@ -60,9 +63,11 @@ pygame.mixer.music.load('resources/audio/moonlight.wav')
 pygame.mixer.music.play(-1, 0.0)
 pygame.mixer.music.set_volume(0.25)
 
+
 # 4 - keep looping through
 running = 1
 exitcode = 0
+retry_again = False
 while running:
     badtimer -= 1
     # 5 - clear the screen before drawing it again
@@ -75,6 +80,9 @@ while running:
     screen.blit(castle, (0, 135))
     screen.blit(castle, (0, 240))
     screen.blit(castle, (0, 345))
+
+    # 6 - draw the screen elements
+    # 6.1 - Set player position and rotation
     position = pygame.mouse.get_pos()
 
     angle = math.atan2(position[1]-(playerpos[1]+32), position[0]-(playerpos[0]+26))
@@ -86,6 +94,7 @@ while running:
 
     screen.blit(playerrot, playerpos1)
 
+    # 6.2 - Draw arrows
     for bullet in arrows:
         index = 0
         velx = math.cos(bullet[0])*10
@@ -98,7 +107,7 @@ while running:
         for projectile in arrows:
             arrow1 = pygame.transform.rotate(arrow, 360-projectile[0]*57.29)
             screen.blit(arrow1, (projectile[1], projectile[2]))
-
+    # 6.3 - Draw badgers
     if badtimer == 0:
         badguys.append([640, random.randint(50, 430)])
         badtimer = 100-(badtimer1*2)
@@ -111,6 +120,7 @@ while running:
         if badguy[0] < -64:
             badguys.pop(index)
         badguy[0] -= 7
+        # 6.3.1 - Attack castle
         badrect = pygame.Rect(badguyimg.get_rect())
         badrect.top = badguy[1]
         badrect.left = badguy[0]
@@ -131,6 +141,8 @@ while running:
                 badguys.pop(index)
                 arrows.pop(index1)
             index1 += 1
+
+        # 6.3.3 - Next bad guy
         index += 1
 
     for badguy in badguys:
@@ -222,6 +234,10 @@ if exitcode == 0:
     textRect.centerx = screen.get_rect().centerx
     textRect.centery = screen.get_rect().centery+24
     screen.blit(gameover, (0, 0))
+    screen.blit(retry, (180, 170))
+
+    if event.type == pygame.MOUSEBUTTONDOWN:
+        retry_again = True
     screen.blit(text, textRect)
 else:
     pygame.font.init()
@@ -231,6 +247,10 @@ else:
     textRect.centerx = screen.get_rect().centerx
     textRect.centery = screen.get_rect().centery+24
     screen.blit(youwin, (0, 0))
+
+    screen.blit(retry, (180, 170))
+    if event.type == pygame.MOUSEBUTTONDOWN:
+        retry_again = True
     screen.blit(text, textRect)
 while 1:
     for event in pygame.event.get():
